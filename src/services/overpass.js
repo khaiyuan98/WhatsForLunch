@@ -1,62 +1,48 @@
-const OVERPASS_API = 'https://overpass-api.de/api/interpreter';
+const FSQ_BASE = '/api/foursquare/places/search';
+const API_KEY = import.meta.env.VITE_FOURSQUARE_API_KEY;
 
 export async function searchNearbyFood(lat, lng, radiusMeters) {
-  const query = `
-    [out:json][timeout:25];
-    (
-      node["amenity"="restaurant"](around:${radiusMeters},${lat},${lng});
-      node["amenity"="fast_food"](around:${radiusMeters},${lat},${lng});
-      node["amenity"="cafe"](around:${radiusMeters},${lat},${lng});
-      way["amenity"="restaurant"](around:${radiusMeters},${lat},${lng});
-      way["amenity"="fast_food"](around:${radiusMeters},${lat},${lng});
-      way["amenity"="cafe"](around:${radiusMeters},${lat},${lng});
-    );
-    out center body;
-  `;
+  const params = new URLSearchParams({
+    ll: `${lat},${lng}`,
+    radius: String(Math.min(radiusMeters, 100000)),
+    query: 'food',
+    limit: '50',
+    sort: 'DISTANCE',
+    fields: 'name,categories,distance,latitude,longitude,location,tel,website',
+  });
 
-  const response = await fetch(OVERPASS_API, {
-    method: 'POST',
-    body: `data=${encodeURIComponent(query)}`,
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  const response = await fetch(`${FSQ_BASE}?${params}`, {
+    headers: {
+      Authorization: `Bearer ${API_KEY}`,
+      Accept: 'application/json',
+      'X-Places-Api-Version': '2025-06-17',
+    },
   });
 
   if (!response.ok) throw new Error('Failed to search for nearby food places');
 
   const data = await response.json();
 
-  return data.elements
-    .map((el) => {
-      const elLat = el.lat ?? el.center?.lat;
-      const elLng = el.lon ?? el.center?.lon;
-      if (!elLat || !elLng) return null;
-
-      const tags = el.tags || {};
-      if (!tags.name) return null;
+  return (data.results || [])
+    .map((place) => {
+      if (!place.latitude || !place.longitude || !place.name) return null;
 
       return {
-        id: el.id,
-        name: tags.name,
-        lat: elLat,
-        lng: elLng,
-        cuisine: tags.cuisine || null,
-        amenity: tags.amenity,
-        address: formatAddress(tags),
-        openingHours: tags.opening_hours || null,
-        phone: tags.phone || tags['contact:phone'] || null,
-        website: tags.website || tags['contact:website'] || null,
+        id: `${place.latitude}-${place.longitude}-${place.name}`,
+        name: place.name,
+        lat: place.latitude,
+        lng: place.longitude,
+        category: place.categories?.[0]?.short_name || place.categories?.[0]?.name || null,
+        categoryIcon: place.categories?.[0]?.icon
+          ? `${place.categories[0].icon.prefix}120${place.categories[0].icon.suffix}`
+          : null,
+        address: place.location?.formatted_address || null,
+        phone: place.tel || null,
+        website: place.website || null,
+        distance: place.distance ?? null,
       };
     })
     .filter(Boolean);
-}
-
-function formatAddress(tags) {
-  const parts = [
-    tags['addr:housenumber'],
-    tags['addr:street'],
-    tags['addr:city'],
-  ].filter(Boolean);
-
-  return parts.length > 0 ? parts.join(' ') : null;
 }
 
 export function pickRandom(places, count = 10) {

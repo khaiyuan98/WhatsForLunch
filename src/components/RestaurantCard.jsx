@@ -1,20 +1,14 @@
-import { formatDistance, haversineDistance } from '../utils/distance';
-
-const AMENITY_LABELS = {
-  restaurant: 'Restaurant',
-  fast_food: 'Fast Food',
-  cafe: 'Cafe',
-};
-
-const AMENITY_COLORS = {
-  restaurant: 'bg-blue-100 text-blue-700',
-  fast_food: 'bg-red-100 text-red-700',
-  cafe: 'bg-amber-100 text-amber-700',
-};
+function formatDistance(meters) {
+  if (meters == null) return null;
+  if (meters < 1000) return `${Math.round(meters)}m`;
+  return `${(meters / 1000).toFixed(1)}km`;
+}
 
 export default function RestaurantCard({ place, userLocation, isWinner }) {
-  const distance = haversineDistance(userLocation.lat, userLocation.lng, place.lat, place.lng);
-  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`;
+  const destination = place.address
+    ? `${place.name}, ${place.address}`
+    : `${place.name}, ${userLocation.locality || ''}`;
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${encodeURIComponent(destination)}`;
 
   return (
     <div
@@ -30,28 +24,30 @@ export default function RestaurantCard({ place, userLocation, isWinner }) {
         </span>
       )}
 
-      <h3 className="text-lg font-bold text-gray-800 leading-tight">{place.name}</h3>
+      <div className="flex items-start gap-3">
+        {place.categoryIcon && (
+          <div className="shrink-0 w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
+            <img src={place.categoryIcon} alt="" className="w-8 h-8" />
+          </div>
+        )}
+        <h3 className="text-lg font-bold text-gray-800 leading-tight pt-1">{place.name}</h3>
+      </div>
 
       <div className="flex flex-wrap gap-2 mt-2">
-        <span className={`text-xs font-medium px-2 py-1 rounded-full ${AMENITY_COLORS[place.amenity] || 'bg-gray-100 text-gray-600'}`}>
-          {AMENITY_LABELS[place.amenity] || place.amenity}
-        </span>
-        {place.cuisine && (
-          <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-700">
-            {place.cuisine.split(';')[0]}
+        {place.category && (
+          <span className="text-xs font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+            {place.category}
           </span>
         )}
-        <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-600">
-          {formatDistance(distance)}
-        </span>
+        {formatDistance(place.distance) && (
+          <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+            {formatDistance(place.distance)}
+          </span>
+        )}
       </div>
 
       {place.address && (
         <p className="text-sm text-gray-500 mt-2">{place.address}</p>
-      )}
-
-      {place.openingHours && (
-        <p className="text-xs text-gray-400 mt-1">Hours: {place.openingHours}</p>
       )}
 
       <div className="flex gap-2 mt-4">

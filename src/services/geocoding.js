@@ -21,6 +21,7 @@ export async function searchAddress(query) {
     displayName: item.display_name,
     lat: parseFloat(item.lat),
     lng: parseFloat(item.lon),
+    locality: [item.address?.city || item.address?.town || item.address?.village, item.address?.state].filter(Boolean).join(', ') || null,
   }));
 }
 
@@ -39,5 +40,7 @@ export async function reverseGeocode(lat, lng) {
   if (!response.ok) throw new Error('Reverse geocoding failed');
 
   const data = await response.json();
-  return data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  const label = data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  const locality = [data.address?.city || data.address?.town || data.address?.village, data.address?.state].filter(Boolean).join(', ') || null;
+  return { label, locality };
 }

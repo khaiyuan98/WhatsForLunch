@@ -5,7 +5,6 @@ import { searchAddress, reverseGeocode } from '../services/geocoding';
 export default function LocationPicker({ onLocationSet }) {
   const [addressQuery, setAddressQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
-  const [locationLabel, setLocationLabel] = useState('');
   const [detecting, setDetecting] = useState(false);
   const [error, setError] = useState('');
   const debounceRef = useRef(null);
@@ -16,17 +15,16 @@ export default function LocationPicker({ onLocationSet }) {
     try {
       const coords = await getCurrentPosition();
 
-      // Set location immediately — don't let reverse geocoding block it
-      onLocationSet(coords);
-      setAddressQuery('');
       setSuggestions([]);
 
-      // Try to get a readable label, but fall back to coordinates
+      // Populate the text box with a readable address
       try {
-        const label = await reverseGeocode(coords.lat, coords.lng);
-        setLocationLabel(label);
+        const { label, locality } = await reverseGeocode(coords.lat, coords.lng);
+        setAddressQuery(label.split(',').slice(0, 3).join(',').trim());
+        onLocationSet({ ...coords, locality });
       } catch {
-        setLocationLabel(`${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`);
+        setAddressQuery(`${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`);
+        onLocationSet(coords);
       }
     } catch (err) {
       setError(err.message);
@@ -38,7 +36,6 @@ export default function LocationPicker({ onLocationSet }) {
   function handleInputChange(e) {
     const value = e.target.value;
     setAddressQuery(value);
-    setLocationLabel('');
     setError('');
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -58,10 +55,9 @@ export default function LocationPicker({ onLocationSet }) {
   }
 
   function handleSelectSuggestion(suggestion) {
-    setAddressQuery('');
+    setAddressQuery(suggestion.displayName.split(',').slice(0, 3).join(',').trim());
     setSuggestions([]);
-    setLocationLabel(suggestion.displayName);
-    onLocationSet({ lat: suggestion.lat, lng: suggestion.lng });
+    onLocationSet({ lat: suggestion.lat, lng: suggestion.lng, locality: suggestion.locality });
   }
 
   return (
@@ -104,12 +100,6 @@ export default function LocationPicker({ onLocationSet }) {
           </ul>
         )}
       </div>
-
-      {locationLabel && (
-        <p className="text-center text-sm text-green-600 font-medium">
-          Location set: {locationLabel.split(',').slice(0, 3).join(',')}
-        </p>
-      )}
 
       {error && (
         <p className="text-center text-sm text-red-500">{error}</p>

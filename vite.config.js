@@ -7,4 +7,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    proxy: {
+      '/api/foursquare': {
+        target: 'https://places-api.foursquare.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/foursquare/, ''),
+      },
+    },
+  },
 })

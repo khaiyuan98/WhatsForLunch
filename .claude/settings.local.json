@@ -15,7 +15,18 @@
       "Bash(npm --version)",
       "Bash(npm run:*)",
       "mcp__Claude_Preview__preview_start",
-      "Bash(node ./node_modules/vite/bin/vite.js --version)"
+      "Bash(node ./node_modules/vite/bin/vite.js --version)",
+      "WebFetch(domain:docs.foursquare.com)",
+      "Bash(curl -s -o - -w \"\\\\n%{http_code}\" \"https://places-api.foursquare.com/places/search?ll=40.757,-73.986&radius=800&categories=13065&limit=3&fields=fsq_id,name,geocodes,location,categories,distance\" -H \"Authorization: Bearer XISYP2O4PHGEKFBXXH24FFCK0ID0EE33PLRE4GBDOBVO2URT\" -H \"Accept: application/json\" -H \"X-Places-Api-Version: 2025-06-17\")",
+      "Bash(curl -s \"https://places-api.foursquare.com/places/search?ll=40.757,-73.986&radius=800&categories=13065&limit=3\" -H \"Authorization: Bearer XISYP2O4PHGEKFBXXH24FFCK0ID0EE33PLRE4GBDOBVO2URT\" -H \"Accept: application/json\" -H \"X-Places-Api-Version: 2025-06-17\")",
+      "Bash(python -m json.tool)",
+      "Bash(curl -s \"https://places-api.foursquare.com/places/search?ll=40.757,-73.986&radius=800&query=restaurant&limit=2&fields=name,categories,location,distance,tel,website,latitude,longitude\" -H \"Authorization: Bearer XISYP2O4PHGEKFBXXH24FFCK0ID0EE33PLRE4GBDOBVO2URT\" -H \"Accept: application/json\" -H \"X-Places-Api-Version: 2025-06-17\")",
+      "Bash(curl -s \"https://places-api.foursquare.com/places/search?ll=40.757,-73.986&radius=800&categories=4d4b7105d754a06374d81259&limit=2&fields=name,categories,distance,latitude,longitude\" -H \"Authorization: Bearer XISYP2O4PHGEKFBXXH24FFCK0ID0EE33PLRE4GBDOBVO2URT\" -H \"Accept: application/json\" -H \"X-Places-Api-Version: 2025-06-17\")",
+      "Bash(curl -s \"https://places-api.foursquare.com/places/search?ll=40.757,-73.986&radius=800&query=food&limit=3&fields=name,categories,distance,latitude,longitude,rating,hours,photos,price,location,tel,website\" -H \"Authorization: Bearer XISYP2O4PHGEKFBXXH24FFCK0ID0EE33PLRE4GBDOBVO2URT\" -H \"Accept: application/json\" -H \"X-Places-Api-Version: 2025-06-17\")",
+      "Bash(curl -s \"https://places-api.foursquare.com/places/search?ll=40.757,-73.986&radius=800&query=food&limit=3&fields=name,categories,distance\" -H \"Authorization: Bearer XISYP2O4PHGEKFBXXH24FFCK0ID0EE33PLRE4GBDOBVO2URT\" -H \"Accept: application/json\" -H \"X-Places-Api-Version: 2025-06-17\")",
+      "Bash(curl -s \"https://places-api.foursquare.com/places/search?ll=40.757,-73.986&radius=800&query=food&limit=3&fields=name,categories,distance,latitude,longitude,location,tel,website\" -H \"Authorization: Bearer XISYP2O4PHGEKFBXXH24FFCK0ID0EE33PLRE4GBDOBVO2URT\" -H \"Accept: application/json\" -H \"X-Places-Api-Version: 2025-06-17\")",
+      "Bash(curl -s -w \"\\\\n%{http_code}\" \"https://places-api.foursquare.com/places/search?ll=40.757,-73.986&radius=800&query=food&limit=2&fields=name,photos\" -H \"Authorization: Bearer XISYP2O4PHGEKFBXXH24FFCK0ID0EE33PLRE4GBDOBVO2URT\" -H \"Accept: application/json\" -H \"X-Places-Api-Version: 2025-06-17\")",
+      "Bash(curl -s \"https://places-api.foursquare.com/places/search?ll=40.757,-73.986&radius=800&query=food&limit=3&fields=name,categories\" -H \"Authorization: Bearer XISYP2O4PHGEKFBXXH24FFCK0ID0EE33PLRE4GBDOBVO2URT\" -H \"Accept: application/json\" -H \"X-Places-Api-Version: 2025-06-17\")"
     ]
   }
 }
