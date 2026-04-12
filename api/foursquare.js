@@ -1,8 +1,6 @@
 export default async function handler(req, res) {
-  const fsqPath = `/${req.query.path.join('/')}`;
-  const { path, ...query } = req.query;
-  const params = new URLSearchParams(query);
-  const fsqUrl = `https://places-api.foursquare.com${fsqPath}?${params}`;
+  const params = new URLSearchParams(req.query);
+  const fsqUrl = `https://places-api.foursquare.com/places/search?${params}`;
 
   const response = await fetch(fsqUrl, {
     headers: {

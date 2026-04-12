@@ -1,4 +1,6 @@
-const FSQ_BASE = '/api/foursquare/places/search';
+const FSQ_BASE = import.meta.env.DEV
+  ? '/api/foursquare/places/search'
+  : '/api/foursquare';
 
 export async function searchNearbyFood(lat, lng, radiusMeters) {
   const params = new URLSearchParams({
