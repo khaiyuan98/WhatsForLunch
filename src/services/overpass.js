@@ -11,13 +11,13 @@ export async function searchNearbyFood(lat, lng, radiusMeters) {
     fields: 'name,categories,distance,latitude,longitude,location,tel,website',
   });
 
-  const response = await fetch(`${FSQ_BASE}?${params}`, {
-    headers: {
-      Authorization: `Bearer ${API_KEY}`,
-      Accept: 'application/json',
-      'X-Places-Api-Version': '2025-06-17',
-    },
-  });
+  const headers = { Accept: 'application/json' };
+  if (import.meta.env.DEV) {
+    headers.Authorization = `Bearer ${API_KEY}`;
+    headers['X-Places-Api-Version'] = '2025-06-17';
+  }
+
+  const response = await fetch(`${FSQ_BASE}?${params}`, { headers });
 
   if (!response.ok) throw new Error('Failed to search for nearby food places');
 

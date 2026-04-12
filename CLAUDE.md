@@ -18,11 +18,15 @@ A "lunch roulette" web app that helps indecisive people pick a nearby restaurant
 
 ## Environment Variables
 
+**Local development** (`.env`, gitignored):
 ```
 VITE_FOURSQUARE_API_KEY=<your-foursquare-service-key>
 ```
 
-The `.env` file is gitignored.
+**Vercel production** (set in Vercel dashboard > Settings > Environment Variables):
+```
+FOURSQUARE_API_KEY=<your-foursquare-service-key>
+```
 
 ## Commands
 
@@ -35,6 +39,9 @@ npm run preview  # Serve the production build locally
 ## Project Structure
 
 ```
+api/
+  foursquare/
+    [...path].js           # Vercel serverless function — proxies Foursquare API with server-side auth
 src/
   App.jsx                  # Main app — manages step flow (setup → loading → results)
   main.jsx                 # React root mount
@@ -53,6 +60,7 @@ src/
     overpass.js            # Foursquare Places API search + result normalization + pickRandom
   utils/
     distance.js            # Haversine distance, formatting, search radius lookup
+vercel.json                # Vercel route rewrites
 ```
 
 ## Key Design Decisions
@@ -60,7 +68,7 @@ src/
 - Search radius is computed from break time and travel mode via a lookup table in `utils/distance.js`, not user-configurable directly
 - The wheel picks from 10 randomly selected places out of all results (up to 50 fetched)
 - No persistent state — refreshing starts over
-- Foursquare API calls are proxied through Vite dev server (`/api/foursquare` → `places-api.foursquare.com`) to avoid CORS issues. For production, a server-side proxy or serverless function is needed.
+- Foursquare API calls go to `/api/foursquare` in both environments. In dev, Vite proxies to `places-api.foursquare.com` (client sends auth headers). In production on Vercel, a serverless function (`api/foursquare/[...path].js`) proxies with the API key server-side.
 - Category icons from Foursquare are used as restaurant images (actual photos are a premium feature)
 - Directions links use the restaurant name + address as destination (falls back to name + user's city/state if no address)
 - Location object carries `{ lat, lng, locality }` — locality (city, state) comes from Nominatim and is used for directions fallback
