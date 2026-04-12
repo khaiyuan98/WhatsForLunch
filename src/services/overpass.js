@@ -1,4 +1,6 @@
-const FSQ_BASE = '/api/foursquare/places/search';
+const FSQ_DEV_BASE = '/api/foursquare/places/search';
+const FSQ_PROD_BASE = 'https://places-api.foursquare.com/places/search';
+const FSQ_BASE = import.meta.env.DEV ? FSQ_DEV_BASE : FSQ_PROD_BASE;
 const API_KEY = import.meta.env.VITE_FOURSQUARE_API_KEY;
 
 export async function searchNearbyFood(lat, lng, radiusMeters) {
@@ -11,13 +13,13 @@ export async function searchNearbyFood(lat, lng, radiusMeters) {
     fields: 'name,categories,distance,latitude,longitude,location,tel,website',
   });
 
-  const headers = { Accept: 'application/json' };
-  if (import.meta.env.DEV) {
-    headers.Authorization = `Bearer ${API_KEY}`;
-    headers['X-Places-Api-Version'] = '2025-06-17';
-  }
-
-  const response = await fetch(`${FSQ_BASE}?${params}`, { headers });
+  const response = await fetch(`${FSQ_BASE}?${params}`, {
+    headers: {
+      Authorization: `Bearer ${API_KEY}`,
+      Accept: 'application/json',
+      'X-Places-Api-Version': '2025-06-17',
+    },
+  });
 
   if (!response.ok) throw new Error('Failed to search for nearby food places');
 
