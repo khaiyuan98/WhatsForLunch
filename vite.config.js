@@ -1,19 +1,35 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss(),
-  ],
-  server: {
-    proxy: {
-      '/api/foursquare': {
-        target: 'https://places-api.foursquare.com',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/foursquare/, ''),
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+
+  return {
+    plugins: [
+      react(),
+      tailwindcss(),
+      {
+        name: 'foursquare-proxy',
+        configureServer(server) {
+          server.middlewares.use('/api/foursquare', async (req, res) => {
+            const query = req.url.startsWith('?') ? req.url.slice(1) : req.url.replace(/^[^?]*\?/, '');
+            const fsqUrl = `https://places-api.foursquare.com/places/search?${query}`;
+
+            const response = await fetch(fsqUrl, {
+              headers: {
+                Authorization: `Bearer ${env.VITE_FOURSQUARE_API_KEY}`,
+                Accept: 'application/json',
+                'X-Places-Api-Version': '2025-06-17',
+              },
+            });
+
+            const data = await response.json();
+            res.writeHead(response.status, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(data));
+          });
+        },
       },
-    },
-  },
+    ],
+  }
 })

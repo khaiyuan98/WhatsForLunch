@@ -1,7 +1,3 @@
-const FSQ_BASE = import.meta.env.DEV
-  ? '/api/foursquare/places/search'
-  : '/api/foursquare';
-
 export async function searchNearbyFood(lat, lng, radiusMeters) {
   const params = new URLSearchParams({
     ll: `${lat},${lng}`,
@@ -12,13 +8,9 @@ export async function searchNearbyFood(lat, lng, radiusMeters) {
     fields: 'name,categories,distance,latitude,longitude,location,tel,website',
   });
 
-  const headers = { Accept: 'application/json' };
-  if (import.meta.env.DEV) {
-    headers.Authorization = `Bearer ${import.meta.env.VITE_FOURSQUARE_API_KEY}`;
-    headers['X-Places-Api-Version'] = '2025-06-17';
-  }
-
-  const response = await fetch(`${FSQ_BASE}?${params}`, { headers });
+  const response = await fetch(`/api/foursquare?${params}`, {
+    headers: { Accept: 'application/json' },
+  });
 
   if (!response.ok) throw new Error('Failed to search for nearby food places');
 
