@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/api/foursquare/(.*)", "destination": "/api/foursquare/$1" }
+  ]
+}
