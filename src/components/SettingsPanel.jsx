@@ -30,7 +30,7 @@ export default function SettingsPanel({ breakTime, setBreakTime, travelMode, set
             className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
               value === opt.value
                 ? 'bg-orange-500 text-white shadow-sm'
-                : 'text-stone-500 dark:text-neutral-400 hover:text-stone-700 dark:hover:text-neutral-200'
+                : 'text-stone-600 dark:text-neutral-400 hover:text-stone-800 dark:hover:text-neutral-200'
             }`}
           >
             {opt.label}
@@ -44,14 +44,14 @@ export default function SettingsPanel({ breakTime, setBreakTime, travelMode, set
     <div className="w-full max-w-md mx-auto animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
       <div className="bg-stone-50 dark:bg-neutral-900 rounded-2xl p-6 border border-stone-300 dark:border-neutral-800 shadow-sm space-y-5">
         <div>
-          <label className="block text-sm font-semibold text-stone-600 dark:text-neutral-400 mb-2">
+          <label className="block text-sm font-semibold text-stone-700 dark:text-neutral-400 mb-2">
             How long is your break?
           </label>
           <ToggleGroup options={breakOptions} value={breakTime} onChange={setBreakTime} />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-stone-600 dark:text-neutral-400 mb-2">
+          <label className="block text-sm font-semibold text-stone-700 dark:text-neutral-400 mb-2">
             How are you getting there?
           </label>
           <ToggleGroup
@@ -65,7 +65,7 @@ export default function SettingsPanel({ breakTime, setBreakTime, travelMode, set
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-stone-600 dark:text-neutral-400 mb-2">
+          <label className="block text-sm font-semibold text-stone-700 dark:text-neutral-400 mb-2">
             Search radius
             <span className="ml-2 text-orange-500 font-bold">{formatRadius(searchRadius)}</span>
           </label>
@@ -78,14 +78,14 @@ export default function SettingsPanel({ breakTime, setBreakTime, travelMode, set
             onChange={(e) => setSearchRadius(Number(e.target.value))}
             className="w-full accent-orange-500 cursor-pointer"
           />
-          <div className="flex justify-between text-xs text-stone-400 dark:text-neutral-500 mt-1">
+          <div className="flex justify-between text-xs text-stone-500 dark:text-neutral-500 mt-1">
             <span>{formatRadius(step)}</span>
             <span>{formatRadius(maxRadius)}</span>
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-stone-600 dark:text-neutral-400 mb-2">
+          <label className="block text-sm font-semibold text-stone-700 dark:text-neutral-400 mb-2">
             Places on the wheel
           </label>
           <ToggleGroup options={wheelOptions} value={wheelSize} onChange={setWheelSize} />

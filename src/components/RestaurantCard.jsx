@@ -22,7 +22,7 @@ export default function RestaurantCard({ place, userLocation, isWinner, isOnWhee
           <div className="flex items-center gap-3 min-w-0">
             {place.categoryIcon && (
               <div className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
-                isWinner ? 'bg-orange-100 dark:bg-orange-500/20' : 'bg-stone-200 dark:bg-neutral-800'
+                isWinner ? 'bg-orange-200 dark:bg-orange-500/20' : 'bg-stone-300 dark:bg-neutral-800'
               }`}>
                 <img src={place.categoryIcon} alt="" className="w-6 h-6" />
               </div>
@@ -35,13 +35,13 @@ export default function RestaurantCard({ place, userLocation, isWinner, isOnWhee
               </h3>
               <div className="flex items-center gap-1.5 mt-0.5">
                 {place.category && (
-                  <span className="text-xs text-stone-500">{place.category}</span>
+                  <span className="text-xs text-stone-600 dark:text-neutral-400">{place.category}</span>
                 )}
                 {place.category && formatDistance(place.distance) && (
-                  <span className="text-stone-300 dark:text-neutral-700">·</span>
+                  <span className="text-stone-500 dark:text-neutral-600">·</span>
                 )}
                 {formatDistance(place.distance) && (
-                  <span className="text-xs text-stone-500">{formatDistance(place.distance)}</span>
+                  <span className="text-xs text-stone-600 dark:text-neutral-400">{formatDistance(place.distance)}</span>
                 )}
               </div>
             </div>
@@ -77,7 +77,7 @@ export default function RestaurantCard({ place, userLocation, isWinner, isOnWhee
         )}
 
         {place.address && (
-          <p className="text-xs text-stone-400 dark:text-neutral-500 mt-2 leading-relaxed">{place.address}</p>
+          <p className="text-xs text-stone-500 dark:text-neutral-500 mt-2 leading-relaxed">{place.address}</p>
         )}
 
         <div className="flex gap-2 mt-3">

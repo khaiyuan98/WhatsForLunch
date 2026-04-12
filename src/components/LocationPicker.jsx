@@ -73,7 +73,7 @@ export default function LocationPicker({ onLocationSet }) {
         </button>
 
         <div className="relative mt-4">
-          <div className="flex items-center gap-3 text-stone-400 dark:text-neutral-600 text-xs font-medium uppercase tracking-wider">
+          <div className="flex items-center gap-3 text-stone-500 dark:text-neutral-600 text-xs font-medium uppercase tracking-wider">
             <div className="flex-1 h-px bg-stone-200 dark:bg-neutral-800" />
             <span>or type an address</span>
             <div className="flex-1 h-px bg-stone-200 dark:bg-neutral-800" />
@@ -84,7 +84,7 @@ export default function LocationPicker({ onLocationSet }) {
             value={addressQuery}
             onChange={handleInputChange}
             placeholder="e.g. 123 Main St, New York"
-            className="mt-3 w-full bg-stone-50 dark:bg-neutral-800 border border-stone-200 dark:border-neutral-700 rounded-xl py-3.5 px-4 text-stone-800 dark:text-neutral-200 placeholder-stone-400 dark:placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+            className="mt-3 w-full bg-stone-50 dark:bg-neutral-800 border border-stone-200 dark:border-neutral-700 rounded-xl py-3.5 px-4 text-stone-800 dark:text-neutral-200 placeholder-stone-500 dark:placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
           />
 
           {suggestions.length > 0 && (
