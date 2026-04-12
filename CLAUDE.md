@@ -9,12 +9,20 @@ A "lunch roulette" web app that helps indecisive people pick a nearby restaurant
 - **Tailwind CSS 4** (via `@tailwindcss/vite` plugin, no config file — uses `@import "tailwindcss"` in `src/index.css`)
 - No router, no state management library — single-page app with local `useState`
 
-## External APIs (no API keys required)
+## External APIs
 
-- **OpenStreetMap Nominatim** — address search and reverse geocoding (`src/services/geocoding.js`)
-- **Overpass API** — searches for restaurants, fast food, and cafes near a location (`src/services/overpass.js`)
+- **Foursquare Places API** — restaurant search by location (`src/services/overpass.js`). Requires API key in `.env` as `VITE_FOURSQUARE_API_KEY`. Uses the new `places-api.foursquare.com` endpoint with Bearer auth. Free tier fields: name, categories (with icons), distance, location, tel, website. Premium fields (rating, photos, price, hours) require paid credits.
+- **OpenStreetMap Nominatim** — address search and reverse geocoding (`src/services/geocoding.js`). Free, no key required. Returns locality info (city/state) used as fallback for directions links.
 - **Browser Geolocation API** — optional "Use My Location" (`src/services/location.js`)
-- **Google Maps** — directions links only (no API calls)
+- **Google Maps** — directions links only (no API calls). Links include user's searched location as origin and restaurant name + address as destination.
+
+## Environment Variables
+
+```
+VITE_FOURSQUARE_API_KEY=<your-foursquare-service-key>
+```
+
+The `.env` file is gitignored.
 
 ## Commands
 
@@ -34,15 +42,15 @@ src/
   components/
     Header.jsx             # Title and tagline
     LocationPicker.jsx     # GPS detection + address autocomplete (debounced)
-    SettingsPanel.jsx       # Break time (30/45/60 min) + travel mode (walking/driving)
+    SettingsPanel.jsx      # Break time (30/45/60 min) + travel mode (walking/driving)
     SpinWheel.jsx          # Canvas-based spin wheel with eased animation
     ResultsGrid.jsx        # Sorts places (winner first), renders cards in 2-col grid
-    RestaurantCard.jsx     # Place card with distance, cuisine, directions link
+    RestaurantCard.jsx     # Place card with category icon, distance, directions link
     LoadingSpinner.jsx     # Simple CSS spinner
   services/
     location.js            # Wraps navigator.geolocation
-    geocoding.js           # Nominatim forward/reverse geocoding
-    overpass.js            # Overpass QL query + result normalization + pickRandom
+    geocoding.js           # Nominatim forward/reverse geocoding (returns locality for fallback)
+    overpass.js            # Foursquare Places API search + result normalization + pickRandom
   utils/
     distance.js            # Haversine distance, formatting, search radius lookup
 ```
@@ -50,7 +58,10 @@ src/
 ## Key Design Decisions
 
 - Search radius is computed from break time and travel mode via a lookup table in `utils/distance.js`, not user-configurable directly
-- The wheel picks from 10 randomly selected places out of all results
+- The wheel picks from 10 randomly selected places out of all results (up to 50 fetched)
 - No persistent state — refreshing starts over
-- All external API calls are free/keyless (Nominatim, Overpass) — respect their usage policies (no aggressive polling)
+- Foursquare API calls are proxied through Vite dev server (`/api/foursquare` → `places-api.foursquare.com`) to avoid CORS issues. For production, a server-side proxy or serverless function is needed.
+- Category icons from Foursquare are used as restaurant images (actual photos are a premium feature)
+- Directions links use the restaurant name + address as destination (falls back to name + user's city/state if no address)
+- Location object carries `{ lat, lng, locality }` — locality (city, state) comes from Nominatim and is used for directions fallback
 - No tests or linting configured
