@@ -5,10 +5,7 @@ function formatDistance(meters) {
 }
 
 export default function RestaurantCard({ place, userLocation, isWinner, isOnWheel, onToggle }) {
-  const destination = place.address
-    ? `${place.name}, ${place.address}`
-    : `${place.name}, ${userLocation.locality || ''}`;
-  const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${encodeURIComponent(destination)}`;
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${place.lat},${place.lng}`;
 
   return (
     <div

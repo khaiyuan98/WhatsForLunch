@@ -1,4 +1,4 @@
-export default function SettingsPanel({ breakTime, setBreakTime, travelMode, setTravelMode, wheelSize, setWheelSize, onSearch, disabled }) {
+export default function SettingsPanel({ breakTime, setBreakTime, travelMode, setTravelMode, wheelSize, setWheelSize, searchRadius, setSearchRadius, onSearch, disabled }) {
   const breakOptions = [
     { value: 30, label: '30 min' },
     { value: 45, label: '45 min' },
@@ -11,6 +11,14 @@ export default function SettingsPanel({ breakTime, setBreakTime, travelMode, set
     { value: 10, label: '10' },
     { value: 15, label: '15' },
   ];
+
+  const maxRadius = travelMode === 'walking' ? 2000 : 15000;
+  const step = travelMode === 'walking' ? 50 : 250;
+
+  function formatRadius(meters) {
+    if (meters < 1000) return `${meters}m`;
+    return `${(meters / 1000).toFixed(1)}km`;
+  }
 
   function ToggleGroup({ options, value, onChange }) {
     return (
@@ -54,6 +62,26 @@ export default function SettingsPanel({ breakTime, setBreakTime, travelMode, set
             value={travelMode}
             onChange={setTravelMode}
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-stone-600 dark:text-neutral-400 mb-2">
+            Search radius
+            <span className="ml-2 text-orange-500 font-bold">{formatRadius(searchRadius)}</span>
+          </label>
+          <input
+            type="range"
+            min={step}
+            max={maxRadius}
+            step={step}
+            value={Math.round(searchRadius / step) * step || step}
+            onChange={(e) => setSearchRadius(Number(e.target.value))}
+            className="w-full accent-orange-500 cursor-pointer"
+          />
+          <div className="flex justify-between text-xs text-stone-400 dark:text-neutral-500 mt-1">
+            <span>{formatRadius(step)}</span>
+            <span>{formatRadius(maxRadius)}</span>
+          </div>
         </div>
 
         <div>

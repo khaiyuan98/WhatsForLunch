@@ -12,9 +12,9 @@ A "lunch roulette" web app that helps indecisive people pick a nearby restaurant
 ## External APIs
 
 - **Foursquare Places API** — restaurant search by location (`src/services/overpass.js`). Requires API key in `.env` as `VITE_FOURSQUARE_API_KEY`. Uses the new `places-api.foursquare.com` endpoint with Bearer auth. Free tier fields: name, categories (with icons), distance, location, tel, website. Premium fields (rating, photos, price, hours) require paid credits.
-- **OpenStreetMap Nominatim** — address search and reverse geocoding (`src/services/geocoding.js`). Free, no key required. Returns locality info (city/state) used as fallback for directions links.
+- **OpenStreetMap Nominatim** — address search and reverse geocoding (`src/services/geocoding.js`). Free, no key required.
 - **Browser Geolocation API** — optional "Use My Location" (`src/services/location.js`)
-- **Google Maps** — directions links only (no API calls). Links include user's searched location as origin and restaurant name + address as destination.
+- **Google Maps** — directions links only (no API calls). Links use exact lat/lng coordinates for both origin and destination.
 
 ## Environment Variables
 
@@ -40,8 +40,7 @@ npm run preview  # Serve the production build locally
 
 ```
 api/
-  foursquare/
-    [...path].js           # Vercel serverless function — proxies Foursquare API with server-side auth
+  foursquare.js            # Vercel serverless function — proxies Foursquare API with server-side auth
 src/
   App.jsx                  # Main app — manages step flow (setup → loading → results)
   main.jsx                 # React root mount
@@ -68,8 +67,8 @@ vercel.json                # Vercel route rewrites
 - Search radius is computed from break time and travel mode via a lookup table in `utils/distance.js`, not user-configurable directly
 - The wheel picks from 10 randomly selected places out of all results (up to 50 fetched)
 - No persistent state — refreshing starts over
-- Foursquare API calls go to `/api/foursquare` in both environments. In dev, Vite proxies to `places-api.foursquare.com` (client sends auth headers). In production on Vercel, a serverless function (`api/foursquare/[...path].js`) proxies with the API key server-side.
+- Foursquare API calls go to `/api/foursquare` in both environments. In dev, a Vite plugin middleware (`vite.config.js`) proxies with the API key server-side using `loadEnv()`. In production on Vercel, a serverless function (`api/foursquare.js`) does the same. The client never sends auth headers — the API key stays server-side in both environments.
 - Category icons from Foursquare are used as restaurant images (actual photos are a premium feature)
-- Directions links use the restaurant name + address as destination (falls back to name + user's city/state if no address)
-- Location object carries `{ lat, lng, locality }` — locality (city, state) comes from Nominatim and is used for directions fallback
+- Directions links use exact lat/lng coordinates for both origin and destination, ensuring precise navigation
+- Location object carries `{ lat, lng, locality }` — locality (city, state) comes from Nominatim
 - No tests or linting configured

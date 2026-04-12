@@ -17,10 +17,14 @@ Create a `.env` file with your Foursquare API key:
 VITE_FOURSQUARE_API_KEY=<your-key>
 ```
 
+The API key is kept server-side in both dev and production — the client never sends auth headers. In dev, a Vite plugin middleware proxies requests; in production, a Vercel serverless function does the same.
+
 ## Tech Stack
 
 - React 18
 - Vite 6
 - Tailwind CSS 4
 - Foursquare Places API
+- OpenStreetMap Nominatim (geocoding)
+- Google Maps (directions links using coordinates)
 - Deployed on Vercel

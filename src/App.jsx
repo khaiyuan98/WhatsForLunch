@@ -22,15 +22,59 @@ export default function App() {
   }, [dark]);
 
   const [location, setLocation] = useState(null);
-  const [breakTime, setBreakTime] = useState(30);
-  const [travelMode, setTravelMode] = useState('walking');
-  const [wheelSize, setWheelSize] = useState(10);
+  const [breakTime, setBreakTime] = useState(() => {
+    const saved = localStorage.getItem('breakTime');
+    return saved ? Number(saved) : 60;
+  });
+  const [travelMode, setTravelMode] = useState(() => {
+    return localStorage.getItem('travelMode') || 'walking';
+  });
+  const [wheelSize, setWheelSize] = useState(() => {
+    const saved = localStorage.getItem('wheelSize');
+    return saved ? Number(saved) : 10;
+  });
+  const [searchRadius, setSearchRadius] = useState(() => {
+    const saved = localStorage.getItem('searchRadius');
+    return saved ? Number(saved) : null;
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [allPlaces, setAllPlaces] = useState([]);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [winnerId, setWinnerId] = useState(null);
   const [step, setStep] = useState('setup');
+
+  const effectiveRadius = searchRadius ?? getSearchRadius(breakTime, travelMode);
+
+  useEffect(() => {
+    localStorage.setItem('breakTime', String(breakTime));
+  }, [breakTime]);
+
+  useEffect(() => {
+    localStorage.setItem('travelMode', travelMode);
+  }, [travelMode]);
+
+  useEffect(() => {
+    localStorage.setItem('wheelSize', String(wheelSize));
+  }, [wheelSize]);
+
+  useEffect(() => {
+    if (searchRadius !== null) {
+      localStorage.setItem('searchRadius', String(searchRadius));
+    } else {
+      localStorage.removeItem('searchRadius');
+    }
+  }, [searchRadius]);
+
+  function handleBreakTimeChange(value) {
+    setBreakTime(value);
+    setSearchRadius(null);
+  }
+
+  function handleTravelModeChange(value) {
+    setTravelMode(value);
+    setSearchRadius(null);
+  }
 
   async function handleSearch() {
     if (!location) return;
@@ -41,8 +85,7 @@ export default function App() {
     setWinnerId(null);
 
     try {
-      const radius = getSearchRadius(breakTime, travelMode);
-      const fetched = await searchNearbyFood(location.lat, location.lng, radius);
+      const fetched = await searchNearbyFood(location.lat, location.lng, effectiveRadius);
 
       if (fetched.length === 0) {
         setError('No food places found nearby. Try increasing your break time or switching to driving.');
@@ -101,11 +144,13 @@ export default function App() {
 
             <SettingsPanel
               breakTime={breakTime}
-              setBreakTime={setBreakTime}
+              setBreakTime={handleBreakTimeChange}
               travelMode={travelMode}
-              setTravelMode={setTravelMode}
+              setTravelMode={handleTravelModeChange}
               wheelSize={wheelSize}
               setWheelSize={setWheelSize}
+              searchRadius={effectiveRadius}
+              setSearchRadius={setSearchRadius}
               onSearch={handleSearch}
               disabled={!location}
             />

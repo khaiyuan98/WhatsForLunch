@@ -25,8 +25,8 @@ export function formatDistance(km) {
 
 export function getSearchRadius(breakTime, travelMode) {
   const radii = {
-    walking: { 30: 800, 45: 1200, 60: 1600 },
-    driving: { 30: 5000, 45: 8000, 60: 15000 },
+    walking: { 30: 250, 45: 450, 60: 650 },
+    driving: { 30: 2000, 45: 3500, 60: 5000 },
   };
   return radii[travelMode]?.[breakTime] ?? 1000;
 }
