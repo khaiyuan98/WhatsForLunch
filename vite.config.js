@@ -7,7 +7,6 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-  base: 'WhatsForLunch',
   server: {
     proxy: {
       '/api/foursquare': {
