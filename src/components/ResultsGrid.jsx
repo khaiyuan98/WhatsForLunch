@@ -1,6 +1,22 @@
 import { useState, useEffect, useMemo } from 'react';
 import RestaurantCard from './RestaurantCard';
 
+const PRICE_LABELS = {
+  PRICE_LEVEL_FREE: 'Free',
+  PRICE_LEVEL_INEXPENSIVE: '$',
+  PRICE_LEVEL_MODERATE: '$$',
+  PRICE_LEVEL_EXPENSIVE: '$$$',
+  PRICE_LEVEL_VERY_EXPENSIVE: '$$$$',
+};
+
+const PRICE_ORDER = [
+  'PRICE_LEVEL_FREE',
+  'PRICE_LEVEL_INEXPENSIVE',
+  'PRICE_LEVEL_MODERATE',
+  'PRICE_LEVEL_EXPENSIVE',
+  'PRICE_LEVEL_VERY_EXPENSIVE',
+];
+
 export default function ResultsGrid({ places, userLocation, winnerId, selectedIds, onToggle, onSelectAll, onClearAll, onStartOver }) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('distance');
@@ -12,10 +28,22 @@ export default function ResultsGrid({ places, userLocation, winnerId, selectedId
       return new Set();
     }
   });
+  const [excludedPrices, setExcludedPrices] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('excludedPrices'));
+      return saved ? new Set(saved) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
 
   useEffect(() => {
     localStorage.setItem('excludedCategories', JSON.stringify([...excludedCategories]));
   }, [excludedCategories]);
+
+  useEffect(() => {
+    localStorage.setItem('excludedPrices', JSON.stringify([...excludedPrices]));
+  }, [excludedPrices]);
 
   const categories = useMemo(() => {
     const counts = {};
@@ -26,6 +54,18 @@ export default function ResultsGrid({ places, userLocation, winnerId, selectedId
     return Object.entries(counts)
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([name, count]) => ({ name, count }));
+  }, [places]);
+
+  const priceLevels = useMemo(() => {
+    const counts = {};
+    places.forEach((p) => {
+      const key = p.priceLevel || 'UNKNOWN';
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    return PRICE_ORDER
+      .filter((key) => counts[key])
+      .map((key) => ({ key, label: PRICE_LABELS[key], count: counts[key] }))
+      .concat(counts.UNKNOWN ? [{ key: 'UNKNOWN', label: '?', count: counts.UNKNOWN }] : []);
   }, [places]);
 
   function toggleCategory(cat) {
@@ -44,9 +84,27 @@ export default function ResultsGrid({ places, userLocation, winnerId, selectedId
     });
   }
 
+  function togglePrice(priceKey) {
+    setExcludedPrices((prev) => {
+      const next = new Set(prev);
+      if (next.has(priceKey)) {
+        next.delete(priceKey);
+      } else {
+        next.add(priceKey);
+        const idsToRemove = places
+          .filter((p) => (p.priceLevel || 'UNKNOWN') === priceKey)
+          .map((p) => p.id);
+        onClearAll(idsToRemove);
+      }
+      return next;
+    });
+  }
+
   const filtered = places.filter((p) => {
     const cat = p.category || 'Other';
     if (excludedCategories.has(cat)) return false;
+    const price = p.priceLevel || 'UNKNOWN';
+    if (excludedPrices.has(price)) return false;
     if (!search) return true;
     const q = search.toLowerCase();
     return p.name.toLowerCase().includes(q) || (p.category && p.category.toLowerCase().includes(q));
@@ -60,11 +118,18 @@ export default function ResultsGrid({ places, userLocation, winnerId, selectedId
     if (aSelected && !bSelected) return -1;
     if (!aSelected && bSelected) return 1;
     if (sortBy === 'name') return a.name.localeCompare(b.name);
+    if (sortBy === 'price') {
+      const aIdx = PRICE_ORDER.indexOf(a.priceLevel) === -1 ? 99 : PRICE_ORDER.indexOf(a.priceLevel);
+      const bIdx = PRICE_ORDER.indexOf(b.priceLevel) === -1 ? 99 : PRICE_ORDER.indexOf(b.priceLevel);
+      return aIdx - bIdx;
+    }
+    if (sortBy === 'rating') return (b.rating ?? 0) - (a.rating ?? 0);
     return (a.distance ?? Infinity) - (b.distance ?? Infinity);
   });
 
   const allCategoriesShown = excludedCategories.size === 0;
   const allCategoriesHidden = categories.length > 0 && categories.every(({ name }) => excludedCategories.has(name));
+  const hasActiveFilters = search || excludedCategories.size > 0 || excludedPrices.size > 0;
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -141,12 +206,61 @@ export default function ResultsGrid({ places, userLocation, winnerId, selectedId
           </div>
         )}
 
+        {priceLevels.length > 1 && (
+          <div className="relative mt-2">
+            <div className="flex items-center gap-1.5 pb-1 overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible">
+              <span className="shrink-0 text-xs font-medium text-stone-400 dark:text-neutral-500">Price:</span>
+              <button
+                onClick={() => setExcludedPrices(new Set())}
+                className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full border-2 transition-all cursor-pointer ${
+                  excludedPrices.size === 0
+                    ? 'bg-green-500 text-white border-green-500 shadow-sm shadow-green-500/25'
+                    : 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border-green-300 dark:border-green-500/30 hover:bg-green-100 dark:hover:bg-green-500/20'
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => {
+                  const allKeys = new Set(priceLevels.map(({ key }) => key));
+                  setExcludedPrices(allKeys);
+                  const idsToRemove = places.map((p) => p.id);
+                  onClearAll(idsToRemove);
+                }}
+                className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full border-2 transition-all cursor-pointer ${
+                  priceLevels.length > 0 && priceLevels.every(({ key }) => excludedPrices.has(key))
+                    ? 'bg-red-500 text-white border-red-500 shadow-sm shadow-red-500/25'
+                    : 'bg-red-50 dark:bg-red-500/10 text-red-500 dark:text-red-400 border-red-300 dark:border-red-500/30 hover:bg-red-100 dark:hover:bg-red-500/20'
+                }`}
+              >
+                None
+              </button>
+              {priceLevels.map(({ key, label, count }) => {
+                const isExcluded = excludedPrices.has(key);
+                return (
+                  <button
+                    key={key}
+                    onClick={() => togglePrice(key)}
+                    className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
+                      isExcluded
+                        ? 'bg-white dark:bg-neutral-800 text-stone-400 dark:text-neutral-600 border-stone-200 dark:border-neutral-800 line-through opacity-60'
+                        : 'bg-white dark:bg-neutral-800 text-green-600 dark:text-green-400 border-green-300 dark:border-green-500/30 hover:border-green-500 dark:hover:border-green-400'
+                    }`}
+                  >
+                    {label} <span className="text-stone-400 dark:text-neutral-500 font-normal">{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-wrap items-center justify-between gap-y-1 mt-2">
           <div className="flex items-center gap-2">
             <p className="text-xs text-stone-500 dark:text-neutral-500">
               <span className="text-orange-500 font-semibold">{selectedIds.size}</span>
               <span className="hidden sm:inline"> contenders</span> on wheel
-              {(search || excludedCategories.size > 0) && <> — {sorted.length}/{places.length}</>}
+              {hasActiveFilters && <> — {sorted.length}/{places.length}</>}
             </p>
             <button
               onClick={() => onSelectAll(sorted.map((p) => p.id))}
@@ -174,6 +288,26 @@ export default function ResultsGrid({ places, userLocation, winnerId, selectedId
               }`}
             >
               Distance
+            </button>
+            <button
+              onClick={() => setSortBy('rating')}
+              className={`text-xs font-medium px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                sortBy === 'rating'
+                  ? 'bg-orange-500 text-white shadow-sm'
+                  : 'text-stone-600 dark:text-neutral-400 hover:text-stone-800 dark:hover:text-neutral-200'
+              }`}
+            >
+              Rating
+            </button>
+            <button
+              onClick={() => setSortBy('price')}
+              className={`text-xs font-medium px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                sortBy === 'price'
+                  ? 'bg-orange-500 text-white shadow-sm'
+                  : 'text-stone-600 dark:text-neutral-400 hover:text-stone-800 dark:hover:text-neutral-200'
+              }`}
+            >
+              Price
             </button>
             <button
               onClick={() => setSortBy('name')}
@@ -205,7 +339,7 @@ export default function ResultsGrid({ places, userLocation, winnerId, selectedId
 
       {sorted.length === 0 && (
         <p className="text-center text-stone-400 dark:text-neutral-500 py-12">
-          {excludedCategories.size > 0 ? "All categories filtered out — tap some chips to bring 'em back!" : `Nothing matches "${search}" — try something else!`}
+          {(excludedCategories.size > 0 || excludedPrices.size > 0) ? "All filtered out — tap some chips to bring 'em back!" : `Nothing matches "${search}" — try something else!`}
         </p>
       )}
     </div>
