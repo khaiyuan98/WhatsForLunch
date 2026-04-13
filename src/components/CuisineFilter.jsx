@@ -1,5 +1,7 @@
 import CUISINE_GROUPS from '../data/cuisineGroups';
 
+const SORTED_GROUPS = [...CUISINE_GROUPS].sort((a, b) => a.label.localeCompare(b.label));
+
 export default function CuisineFilter({ enabledGroups, setEnabledGroups }) {
   const allEnabled = enabledGroups.size === CUISINE_GROUPS.length;
   const noneEnabled = enabledGroups.size === 0;
@@ -52,7 +54,7 @@ export default function CuisineFilter({ enabledGroups, setEnabledGroups }) {
         </div>
       </div>
       <div className="flex flex-wrap gap-1.5">
-        {CUISINE_GROUPS.map((group) => {
+        {SORTED_GROUPS.map((group) => {
           const isEnabled = enabledGroups.has(group.id);
           return (
             <button
