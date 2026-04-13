@@ -1,6 +1,6 @@
 import CuisineFilter from './CuisineFilter';
 
-export default function SettingsPanel({ breakTime, setBreakTime, travelMode, setTravelMode, wheelSize, setWheelSize, searchRadius, setSearchRadius, cuisineGroups, setCuisineGroups, onSearch, disabled }) {
+export default function SettingsPanel({ breakTime, setBreakTime, travelMode, setTravelMode, wheelSize, setWheelSize, searchRadius, setSearchRadius, rankPreference, setRankPreference, cuisineGroups, setCuisineGroups, onSearch, disabled }) {
   const breakOptions = [
     { value: 30, label: '30 min' },
     { value: 60, label: '60 min' },
@@ -84,6 +84,20 @@ export default function SettingsPanel({ breakTime, setBreakTime, travelMode, set
             <span>{formatRadius(step)}</span>
             <span>{formatRadius(maxRadius)}</span>
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-stone-700 dark:text-neutral-400 mb-2">
+            What matters more?
+          </label>
+          <ToggleGroup
+            options={[
+              { value: 'DISTANCE', label: 'Closest' },
+              { value: 'POPULARITY', label: 'Most Popular' },
+            ]}
+            value={rankPreference}
+            onChange={setRankPreference}
+          />
         </div>
 
         <div>

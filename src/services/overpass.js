@@ -17,7 +17,7 @@ const FIELD_MASK = [
   'places.googleMapsUri',
 ].join(',');
 
-export async function searchNearbyFood(lat, lng, radiusMeters, includedTypes) {
+export async function searchNearbyFood(lat, lng, radiusMeters, includedTypes, rankPreference = 'DISTANCE') {
   const response = await fetch('/api/google-places', {
     method: 'POST',
     headers: {
@@ -27,7 +27,7 @@ export async function searchNearbyFood(lat, lng, radiusMeters, includedTypes) {
     body: JSON.stringify({
       includedTypes: includedTypes || ['restaurant', 'cafe', 'bakery', 'meal_takeaway', 'meal_delivery'],
       maxResultCount: 20,
-      rankPreference: 'DISTANCE',
+      rankPreference,
       locationRestriction: {
         circle: {
           center: { latitude: lat, longitude: lng },

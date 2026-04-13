@@ -51,7 +51,7 @@ src/
     Header.jsx             # Title and random tagline (stable per mount)
     ThemeToggle.jsx        # Dark/light mode toggle (fixed position, persisted in localStorage)
     LocationPicker.jsx     # GPS detection + address autocomplete (debounced, z-indexed dropdown)
-    SettingsPanel.jsx      # Break time (30/60/120 min), travel mode, search radius slider, wheel size, cuisine filter
+    SettingsPanel.jsx      # Break time (30/60/120 min), travel mode, search radius slider, rank preference (distance/popularity), wheel size, cuisine filter
     CuisineFilter.jsx      # Pre-search cuisine type picker (16 emoji-labeled groups with All/None toggle)
     SpinWheel.jsx          # Canvas-based spin wheel with gradient segments, eased animation, empty state handling, theme-aware
     ResultsGrid.jsx        # Sticky toolbar with filter, category chips, price filter chips, sort (distance/rating/price/A-Z), select all/clear all, responsive grid
@@ -69,8 +69,9 @@ vercel.json                # Vercel route rewrites
 ## Key Design Decisions
 
 - Search radius has smart defaults computed from break time and travel mode (`utils/distance.js`), but the user can override it via a slider
-- Break time options: 30 / 60 / 120 minutes; defaults: 60 min break, walking mode, 20 places on wheel
-- All user settings (break time, travel mode, wheel size, search radius, cuisine groups, excluded categories, excluded prices) persist in localStorage
+- Break time options: 30 / 60 / 120 minutes; defaults: 60 min break, walking mode, 20 places on wheel, rank by distance
+- **Rank preference**: user can choose between `DISTANCE` (closest first) and `POPULARITY` (most popular first) — sent as `rankPreference` to Google Places API
+- All user settings (break time, travel mode, wheel size, search radius, rank preference, cuisine groups, excluded categories, excluded prices) persist in localStorage
 - **Pre-search cuisine filter**: 16 cuisine groups (American, Asian, European, Latin American, etc.) with emoji labels. Each maps to specific Google Places types. When all groups are selected, uses broad parent types for max coverage. When specific groups are selected, sends their exact types as `includedTypes` (capped at 50, the API limit).
 - **Post-search category filter**: chips derived from Google's `primaryType` field (A-Z sorted); All/None chips for bulk toggle; excluded categories also affect initial wheel selection
 - **Post-search price filter**: chips for each price level ($, $$, $$$, $$$$, ?) with All/None toggle; excluded prices persisted in localStorage

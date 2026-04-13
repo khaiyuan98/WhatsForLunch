@@ -40,6 +40,9 @@ export default function App() {
     const saved = localStorage.getItem('searchRadius');
     return saved ? Number(saved) : null;
   });
+  const [rankPreference, setRankPreference] = useState(() => {
+    return localStorage.getItem('rankPreference') || 'DISTANCE';
+  });
   const [cuisineGroups, setCuisineGroups] = useState(() => {
     try {
       const saved = JSON.parse(localStorage.getItem('cuisineGroups'));
@@ -78,6 +81,10 @@ export default function App() {
   }, [searchRadius]);
 
   useEffect(() => {
+    localStorage.setItem('rankPreference', rankPreference);
+  }, [rankPreference]);
+
+  useEffect(() => {
     localStorage.setItem('cuisineGroups', JSON.stringify([...cuisineGroups]));
   }, [cuisineGroups]);
 
@@ -113,7 +120,7 @@ export default function App() {
         includedTypes = [...new Set(includedTypes)].slice(0, 50);
       }
 
-      const fetched = await searchNearbyFood(location.lat, location.lng, effectiveRadius, includedTypes);
+      const fetched = await searchNearbyFood(location.lat, location.lng, effectiveRadius, includedTypes, rankPreference);
 
       if (fetched.length === 0) {
         setError('No food nearby — are you in the middle of nowhere? Try a bigger radius or switch to driving.');
@@ -205,6 +212,8 @@ export default function App() {
               setWheelSize={setWheelSize}
               searchRadius={effectiveRadius}
               setSearchRadius={setSearchRadius}
+              rankPreference={rankPreference}
+              setRankPreference={setRankPreference}
               cuisineGroups={cuisineGroups}
               setCuisineGroups={setCuisineGroups}
               onSearch={handleSearch}

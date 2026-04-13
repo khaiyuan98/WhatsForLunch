@@ -25,7 +25,7 @@ The API key is kept server-side in both dev and production — the client never 
 
 - Spin wheel picks a random restaurant from nearby places
 - **Pre-search cuisine filter** — 16 cuisine groups (American, Asian, European, Latin American, etc.) to narrow results before searching
-- Adjustable search radius, break time (30/60/120 min), travel mode, and number of contenders
+- Adjustable search radius, break time (30/60/120 min), travel mode, rank preference (closest vs most popular), and number of contenders
 - **Post-search filters** — category chips and price level chips ($, $$, $$$, $$$$) to refine results
 - Sort results by distance, rating, price, or alphabetically
 - Filter results by name or category
