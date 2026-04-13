@@ -5,7 +5,7 @@ const COLORS = [
   '#D97706', '#DB2777', '#4F46E5', '#0D9488', '#E11D48',
 ];
 
-export default function SpinWheel({ items, onResult }) {
+export default function SpinWheel({ items, onResult, dark }) {
   const canvasRef = useRef(null);
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
@@ -22,7 +22,7 @@ export default function SpinWheel({ items, onResult }) {
     const size = canvas.width;
     const center = size / 2;
     const outerRadius = center - 16;
-    const isDark = document.documentElement.classList.contains('dark');
+    const isDark = dark;
 
     ctx.clearRect(0, 0, size, size);
 
@@ -157,7 +157,7 @@ export default function SpinWheel({ items, onResult }) {
     ctx.closePath();
     ctx.fillStyle = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)';
     ctx.fill();
-  }, [items, segmentAngle]);
+  }, [items, segmentAngle, dark]);
 
   useEffect(() => {
     drawWheel(rotation);

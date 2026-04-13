@@ -22,15 +22,17 @@ The API key is kept server-side in both dev and production — the client never 
 ## Features
 
 - Spin wheel picks a random restaurant from nearby places
-- Adjustable search radius, break time, travel mode, and number of contenders
-- Add/remove individual places, or select all/clear all
+- Adjustable search radius, break time (30/60/120 min), travel mode, and number of contenders
+- Category filter chips to include/exclude food types (e.g. Pizza, Indian, Deli)
+- Add/remove individual places, or select all/clear all (scoped to visible filters)
 - Sort results by distance or alphabetically
 - Filter results by name or category
 - Google Maps directions with exact coordinates
-- Settings remembered between visits (localStorage)
+- All settings and category filters remembered between visits (localStorage)
 - Dark/light mode with system preference detection
 - Responsive design (mobile-first)
 - Playful flavor text throughout
+- Version number in footer
 
 ## Tech Stack
 

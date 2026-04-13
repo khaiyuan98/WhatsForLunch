@@ -8,8 +8,10 @@ const TAGLINES = [
   "Where indecision meets destiny.",
 ];
 
+import { useState } from 'react';
+
 export default function Header() {
-  const tagline = TAGLINES[Math.floor(Math.random() * TAGLINES.length)];
+  const [tagline] = useState(() => TAGLINES[Math.floor(Math.random() * TAGLINES.length)]);
 
   return (
     <header className="text-center pt-12 sm:pt-10 pb-4 sm:pb-6 px-10 sm:px-0">

@@ -96,7 +96,17 @@ export default function App() {
       }
 
       setAllPlaces(fetched);
-      const preSelected = pickRandom(fetched, wheelSize);
+      let excluded;
+      try {
+        const saved = JSON.parse(localStorage.getItem('excludedCategories'));
+        excluded = saved ? new Set(saved) : new Set();
+      } catch {
+        excluded = new Set();
+      }
+      const eligible = excluded.size > 0
+        ? fetched.filter((p) => !excluded.has(p.category || 'Other'))
+        : fetched;
+      const preSelected = pickRandom(eligible.length > 0 ? eligible : fetched, wheelSize);
       setSelectedIds(new Set(preSelected.map((p) => p.id)));
       setStep('results');
     } catch (err) {
@@ -126,12 +136,20 @@ export default function App() {
     setWinnerId(winner.id);
   }
 
-  function handleSelectAll() {
-    setSelectedIds(new Set(allPlaces.map((p) => p.id)));
+  function handleSelectAll(ids) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      ids.forEach((id) => next.add(id));
+      return next;
+    });
   }
 
-  function handleClearAll() {
-    setSelectedIds(new Set());
+  function handleClearAll(ids) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      ids.forEach((id) => next.delete(id));
+      return next;
+    });
   }
 
   function handleStartOver() {
@@ -175,7 +193,7 @@ export default function App() {
 
         {step === 'results' && (
           <>
-            <SpinWheel items={wheelPlaces} onResult={handleWheelResult} />
+            <SpinWheel items={wheelPlaces} onResult={handleWheelResult} dark={dark} />
 
             <ResultsGrid
               places={allPlaces}

@@ -1,14 +1,56 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import RestaurantCard from './RestaurantCard';
 
 export default function ResultsGrid({ places, userLocation, winnerId, selectedIds, onToggle, onSelectAll, onClearAll, onStartOver }) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('distance');
+  const [excludedCategories, setExcludedCategories] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('excludedCategories'));
+      return saved ? new Set(saved) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
 
-  const filtered = places.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    (p.category && p.category.toLowerCase().includes(search.toLowerCase()))
-  );
+  useEffect(() => {
+    localStorage.setItem('excludedCategories', JSON.stringify([...excludedCategories]));
+  }, [excludedCategories]);
+
+  const categories = useMemo(() => {
+    const counts = {};
+    places.forEach((p) => {
+      const cat = p.category || 'Other';
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([name, count]) => ({ name, count }));
+  }, [places]);
+
+  function toggleCategory(cat) {
+    setExcludedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(cat)) {
+        next.delete(cat);
+      } else {
+        next.add(cat);
+        const idsToRemove = places
+          .filter((p) => (p.category || 'Other') === cat)
+          .map((p) => p.id);
+        onClearAll(idsToRemove);
+      }
+      return next;
+    });
+  }
+
+  const filtered = places.filter((p) => {
+    const cat = p.category || 'Other';
+    if (excludedCategories.has(cat)) return false;
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return p.name.toLowerCase().includes(q) || (p.category && p.category.toLowerCase().includes(q));
+  });
 
   const sorted = [...filtered].sort((a, b) => {
     if (a.id === winnerId) return -1;
@@ -20,6 +62,9 @@ export default function ResultsGrid({ places, userLocation, winnerId, selectedId
     if (sortBy === 'name') return a.name.localeCompare(b.name);
     return (a.distance ?? Infinity) - (b.distance ?? Infinity);
   });
+
+  const allCategoriesShown = excludedCategories.size === 0;
+  const allCategoriesHidden = categories.length > 0 && categories.every(({ name }) => excludedCategories.has(name));
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -49,24 +94,71 @@ export default function ResultsGrid({ places, userLocation, winnerId, selectedId
           </button>
         </div>
 
+        {categories.length > 1 && (
+          <div className="relative mt-2">
+          <div className="flex flex-wrap gap-1.5 pb-1">
+            <button
+              onClick={() => setExcludedCategories(new Set())}
+              className={`shrink-0 text-xs font-semibold px-3 py-1 rounded-full border-2 transition-all cursor-pointer ${
+                allCategoriesShown
+                  ? 'bg-green-500 text-white border-green-500 shadow-sm shadow-green-500/25'
+                  : 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border-green-300 dark:border-green-500/30 hover:bg-green-100 dark:hover:bg-green-500/20'
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => {
+                const allNames = new Set(categories.map(({ name }) => name));
+                setExcludedCategories(allNames);
+                onClearAll(places.map((p) => p.id));
+              }}
+              className={`shrink-0 text-xs font-semibold px-3 py-1 rounded-full border-2 transition-all cursor-pointer ${
+                allCategoriesHidden
+                  ? 'bg-red-500 text-white border-red-500 shadow-sm shadow-red-500/25'
+                  : 'bg-red-50 dark:bg-red-500/10 text-red-500 dark:text-red-400 border-red-300 dark:border-red-500/30 hover:bg-red-100 dark:hover:bg-red-500/20'
+              }`}
+            >
+              None
+            </button>
+            {categories.map(({ name, count }) => {
+              const isExcluded = excludedCategories.has(name);
+              return (
+                <button
+                  key={name}
+                  onClick={() => toggleCategory(name)}
+                  className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
+                    isExcluded
+                      ? 'bg-white dark:bg-neutral-800 text-stone-400 dark:text-neutral-600 border-stone-200 dark:border-neutral-800 line-through opacity-60'
+                      : 'bg-white dark:bg-neutral-800 text-stone-700 dark:text-neutral-300 border-amber-200 dark:border-neutral-700 hover:border-orange-400 dark:hover:border-orange-500'
+                  }`}
+                >
+                  {name} <span className="text-stone-400 dark:text-neutral-500 font-normal">{count}</span>
+                </button>
+              );
+            })}
+          </div>
+          </div>
+        )}
+
         <div className="flex flex-wrap items-center justify-between gap-y-1 mt-2">
           <div className="flex items-center gap-2">
             <p className="text-xs text-stone-500 dark:text-neutral-500">
               <span className="text-orange-500 font-semibold">{selectedIds.size}</span>
               <span className="hidden sm:inline"> contenders</span> on wheel
-              {search && <> — {sorted.length}/{places.length}</>}
+              {(search || excludedCategories.size > 0) && <> — {sorted.length}/{places.length}</>}
             </p>
             <button
-              onClick={onSelectAll}
-              disabled={selectedIds.size === places.length}
+              onClick={() => onSelectAll(sorted.map((p) => p.id))}
+              disabled={sorted.every((p) => selectedIds.has(p.id))}
               className="text-xs font-medium text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 disabled:opacity-30 disabled:cursor-default cursor-pointer transition-colors"
             >
               All
             </button>
             <span className="text-stone-300 dark:text-neutral-700">|</span>
             <button
-              onClick={onClearAll}
-              disabled={selectedIds.size === 0}
+              onClick={() => onClearAll(sorted.map((p) => p.id))}
+              disabled={sorted.every((p) => !selectedIds.has(p.id))}
               className="text-xs font-medium text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 disabled:opacity-30 disabled:cursor-default cursor-pointer transition-colors"
             >
               None
@@ -112,7 +204,9 @@ export default function ResultsGrid({ places, userLocation, winnerId, selectedId
       </div>
 
       {sorted.length === 0 && (
-        <p className="text-center text-stone-400 dark:text-neutral-500 py-12">Nothing matches "{search}" — try something else!</p>
+        <p className="text-center text-stone-400 dark:text-neutral-500 py-12">
+          {excludedCategories.size > 0 ? "All categories filtered out — tap some chips to bring 'em back!" : `Nothing matches "${search}" — try something else!`}
+        </p>
       )}
     </div>
   );

@@ -1,8 +1,8 @@
 export default function SettingsPanel({ breakTime, setBreakTime, travelMode, setTravelMode, wheelSize, setWheelSize, searchRadius, setSearchRadius, onSearch, disabled }) {
   const breakOptions = [
     { value: 30, label: '30 min' },
-    { value: 45, label: '45 min' },
     { value: 60, label: '60 min' },
+    { value: 120, label: '120 min' },
   ];
 
   const wheelOptions = [

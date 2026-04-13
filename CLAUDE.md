@@ -46,12 +46,12 @@ src/
   main.jsx                 # React root mount
   index.css                # Tailwind import + body gradient + animations
   components/
-    Header.jsx             # Title and rotating random taglines
+    Header.jsx             # Title and random tagline (stable per mount)
     ThemeToggle.jsx        # Dark/light mode toggle (fixed position, persisted in localStorage)
     LocationPicker.jsx     # GPS detection + address autocomplete (debounced, z-indexed dropdown)
-    SettingsPanel.jsx      # Break time, travel mode, search radius slider, wheel size
-    SpinWheel.jsx          # Canvas-based spin wheel with gradient segments, eased animation, empty state handling
-    ResultsGrid.jsx        # Sticky toolbar with filter, sort (distance/A-Z), select all/clear all, responsive grid
+    SettingsPanel.jsx      # Break time (30/60/120 min), travel mode, search radius slider, wheel size
+    SpinWheel.jsx          # Canvas-based spin wheel with gradient segments, eased animation, empty state handling, theme-aware
+    ResultsGrid.jsx        # Sticky toolbar with filter, category chips (All/None + per-category, persisted), sort (distance/A-Z), select all/clear all, responsive grid
     RestaurantCard.jsx     # Place card with category icon, distance, directions link, add/remove toggle
     LoadingSpinner.jsx     # Animated spinner with rotating flavor text messages
   services/
@@ -66,9 +66,10 @@ vercel.json                # Vercel route rewrites
 ## Key Design Decisions
 
 - Search radius has smart defaults computed from break time and travel mode (`utils/distance.js`), but the user can override it via a slider
-- Default settings: 60 min break, walking mode, 10 places on wheel
-- All user settings (break time, travel mode, wheel size, search radius) persist in localStorage
-- The wheel picks from randomly selected places out of all results (up to 50 fetched); users can add/remove/select all/clear all
+- Break time options: 30 / 60 / 120 minutes; defaults: 60 min break, walking mode, 10 places on wheel
+- All user settings (break time, travel mode, wheel size, search radius, excluded categories) persist in localStorage
+- Category filter chips let users include/exclude food types (A-Z sorted); All/None chips for bulk toggle; excluded categories also affect initial wheel selection
+- The wheel picks from randomly selected places out of all results (up to 50 fetched); users can add/remove/select all/clear all (scoped to visible filtered results)
 - Wheel requires at least 2 places to spin; shows helpful messages for 0 or 1 items
 - Foursquare API calls go to `/api/foursquare` in both environments. In dev, a Vite plugin middleware (`vite.config.js`) proxies with the API key server-side using `loadEnv()`. In production on Vercel, a serverless function (`api/foursquare.js`) does the same. The client never sends auth headers — the API key stays server-side in both environments.
 - Category icons from Foursquare are used as restaurant images (actual photos are a premium feature)
