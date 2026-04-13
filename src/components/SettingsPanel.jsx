@@ -1,4 +1,6 @@
-export default function SettingsPanel({ breakTime, setBreakTime, travelMode, setTravelMode, wheelSize, setWheelSize, searchRadius, setSearchRadius, onSearch, disabled }) {
+import CuisineFilter from './CuisineFilter';
+
+export default function SettingsPanel({ breakTime, setBreakTime, travelMode, setTravelMode, wheelSize, setWheelSize, searchRadius, setSearchRadius, cuisineGroups, setCuisineGroups, onSearch, disabled }) {
   const breakOptions = [
     { value: 30, label: '30 min' },
     { value: 60, label: '60 min' },
@@ -7,9 +9,9 @@ export default function SettingsPanel({ breakTime, setBreakTime, travelMode, set
 
   const wheelOptions = [
     { value: 5, label: '5' },
-    { value: 8, label: '8' },
     { value: 10, label: '10' },
     { value: 15, label: '15' },
+    { value: 20, label: '20' },
   ];
 
   const maxRadius = travelMode === 'walking' ? 2000 : 15000;
@@ -91,9 +93,11 @@ export default function SettingsPanel({ breakTime, setBreakTime, travelMode, set
           <ToggleGroup options={wheelOptions} value={wheelSize} onChange={setWheelSize} />
         </div>
 
+        <CuisineFilter enabledGroups={cuisineGroups} setEnabledGroups={setCuisineGroups} />
+
         <button
           onClick={onSearch}
-          disabled={disabled}
+          disabled={disabled || cuisineGroups.size === 0}
           className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-neutral-300 dark:disabled:bg-neutral-700 disabled:text-neutral-500 text-white font-bold py-4 px-6 rounded-xl text-lg transition-all cursor-pointer"
         >
           Feed Me!

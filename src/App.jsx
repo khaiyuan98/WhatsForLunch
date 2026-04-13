@@ -8,6 +8,7 @@ import ResultsGrid from './components/ResultsGrid';
 import LoadingSpinner from './components/LoadingSpinner';
 import { searchNearbyFood, pickRandom } from './services/overpass';
 import { getSearchRadius } from './utils/distance';
+import CUISINE_GROUPS, { ALL_FOOD_TYPES } from './data/cuisineGroups';
 
 const APP_VERSION = __APP_VERSION__;
 
@@ -33,11 +34,19 @@ export default function App() {
   });
   const [wheelSize, setWheelSize] = useState(() => {
     const saved = localStorage.getItem('wheelSize');
-    return saved ? Number(saved) : 10;
+    return saved ? Number(saved) : 20;
   });
   const [searchRadius, setSearchRadius] = useState(() => {
     const saved = localStorage.getItem('searchRadius');
     return saved ? Number(saved) : null;
+  });
+  const [cuisineGroups, setCuisineGroups] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('cuisineGroups'));
+      return saved ? new Set(saved) : new Set(CUISINE_GROUPS.map((g) => g.id));
+    } catch {
+      return new Set(CUISINE_GROUPS.map((g) => g.id));
+    }
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -68,6 +77,10 @@ export default function App() {
     }
   }, [searchRadius]);
 
+  useEffect(() => {
+    localStorage.setItem('cuisineGroups', JSON.stringify([...cuisineGroups]));
+  }, [cuisineGroups]);
+
   function handleBreakTimeChange(value) {
     setBreakTime(value);
     setSearchRadius(null);
@@ -87,7 +100,20 @@ export default function App() {
     setWinnerId(null);
 
     try {
-      const fetched = await searchNearbyFood(location.lat, location.lng, effectiveRadius);
+      // Build includedTypes from selected cuisine groups
+      let includedTypes;
+      const allSelected = cuisineGroups.size === CUISINE_GROUPS.length;
+      if (allSelected) {
+        includedTypes = ALL_FOOD_TYPES;
+      } else {
+        includedTypes = CUISINE_GROUPS
+          .filter((g) => cuisineGroups.has(g.id))
+          .flatMap((g) => g.types);
+        // Deduplicate and cap at 50 (API limit)
+        includedTypes = [...new Set(includedTypes)].slice(0, 50);
+      }
+
+      const fetched = await searchNearbyFood(location.lat, location.lng, effectiveRadius, includedTypes);
 
       if (fetched.length === 0) {
         setError('No food nearby — are you in the middle of nowhere? Try a bigger radius or switch to driving.');
@@ -179,6 +205,8 @@ export default function App() {
               setWheelSize={setWheelSize}
               searchRadius={effectiveRadius}
               setSearchRadius={setSearchRadius}
+              cuisineGroups={cuisineGroups}
+              setCuisineGroups={setCuisineGroups}
               onSearch={handleSearch}
               disabled={!location}
             />

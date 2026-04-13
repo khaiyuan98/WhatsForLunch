@@ -11,24 +11,28 @@ npm install
 npm run dev
 ```
 
-Create a `.env` file with your Foursquare API key:
+Create a `.env` file with your Google Places API key:
 
 ```
-VITE_FOURSQUARE_API_KEY=<your-key>
+GOOGLE_PLACES_API_KEY=<your-key>
 ```
+
+You'll need a Google Cloud project with the **Places API (New)** enabled and a billing account (1,000 free requests/month are included).
 
 The API key is kept server-side in both dev and production — the client never sends auth headers. In dev, a Vite plugin middleware proxies requests; in production, a Vercel serverless function does the same.
 
 ## Features
 
 - Spin wheel picks a random restaurant from nearby places
+- **Pre-search cuisine filter** — 16 cuisine groups (American, Asian, European, Latin American, etc.) to narrow results before searching
 - Adjustable search radius, break time (30/60/120 min), travel mode, and number of contenders
-- Category filter chips to include/exclude food types (e.g. Pizza, Indian, Deli)
-- Add/remove individual places, or select all/clear all (scoped to visible filters)
-- Sort results by distance or alphabetically
+- **Post-search filters** — category chips and price level chips ($, $$, $$$, $$$$) to refine results
+- Sort results by distance, rating, price, or alphabetically
 - Filter results by name or category
-- Google Maps directions with exact coordinates
-- All settings and category filters remembered between visits (localStorage)
+- Cards show star ratings, price level, price range, open/closed status, and website links
+- Google Maps directions using Place IDs for precise navigation
+- Add/remove individual places, or select all/clear all (scoped to visible filters)
+- All settings and filters remembered between visits (localStorage)
 - Dark/light mode with system preference detection
 - Responsive design (mobile-first)
 - Playful flavor text throughout
@@ -39,7 +43,7 @@ The API key is kept server-side in both dev and production — the client never 
 - React 18
 - Vite 6
 - Tailwind CSS 4
-- Foursquare Places API
+- Google Places API (New) — Enterprise SKU
 - OpenStreetMap Nominatim (geocoding)
-- Google Maps (directions links using coordinates)
+- Google Maps (directions links using Place IDs)
 - Deployed on Vercel

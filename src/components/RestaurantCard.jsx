@@ -4,8 +4,36 @@ function formatDistance(meters) {
   return `${(meters / 1000).toFixed(1)}km`;
 }
 
+const PRICE_MAP = {
+  PRICE_LEVEL_FREE: '$',
+  PRICE_LEVEL_INEXPENSIVE: '$',
+  PRICE_LEVEL_MODERATE: '$$',
+  PRICE_LEVEL_EXPENSIVE: '$$$',
+  PRICE_LEVEL_VERY_EXPENSIVE: '$$$$',
+};
+
+function RatingStars({ rating }) {
+  if (!rating) return null;
+  const full = Math.floor(rating);
+  const half = rating - full >= 0.5;
+  return (
+    <div className="flex items-center gap-1">
+      <div className="flex">
+        {[...Array(5)].map((_, i) => (
+          <svg key={i} viewBox="0 0 20 20" fill="currentColor" className={`w-3.5 h-3.5 ${
+            i < full ? 'text-amber-400' : i === full && half ? 'text-amber-400/50' : 'text-stone-300 dark:text-neutral-600'
+          }`}>
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+        ))}
+      </div>
+      <span className="text-xs font-medium text-stone-500 dark:text-neutral-400">{rating}</span>
+    </div>
+  );
+}
+
 export default function RestaurantCard({ place, userLocation, isWinner, isOnWheel, onToggle }) {
-  const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${place.lat},${place.lng}`;
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${encodeURIComponent(place.name)}&destination_place_id=${place.id}`;
 
   return (
     <div
@@ -19,31 +47,37 @@ export default function RestaurantCard({ place, userLocation, isWinner, isOnWhee
     >
       <div className="p-4 flex flex-col h-full">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-3 min-w-0">
-            {place.categoryIcon && (
-              <div className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
-                isWinner ? 'bg-orange-400 dark:bg-orange-500/30' : 'bg-orange-300 dark:bg-orange-500/20'
-              }`}>
-                <img src={place.categoryIcon} alt="" className="w-6 h-6" />
-              </div>
-            )}
-            <div className="min-w-0">
-              <h3 className={`text-base font-bold leading-tight truncate ${
-                isWinner ? 'text-orange-600 dark:text-orange-400' : 'text-stone-800 dark:text-neutral-200'
-              }`}>
-                {place.name}
-              </h3>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                {place.category && (
-                  <span className="text-sm text-stone-600 dark:text-neutral-300">{place.category}</span>
-                )}
-                {place.category && formatDistance(place.distance) && (
-                  <span className="text-stone-500 dark:text-neutral-400">·</span>
-                )}
-                {formatDistance(place.distance) && (
-                  <span className="text-sm text-stone-600 dark:text-neutral-300">{formatDistance(place.distance)}</span>
-                )}
-              </div>
+          <div className="min-w-0">
+            <h3 className={`text-base font-bold leading-tight truncate ${
+              isWinner ? 'text-orange-600 dark:text-orange-400' : 'text-stone-800 dark:text-neutral-200'
+            }`}>
+              {place.name}
+            </h3>
+            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+              {place.category && (
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                  isWinner
+                    ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400'
+                    : 'bg-amber-100 dark:bg-neutral-700 text-stone-600 dark:text-neutral-300'
+                }`}>
+                  {place.category}
+                </span>
+              )}
+              {formatDistance(place.distance) && (
+                <span className="text-xs text-stone-500 dark:text-neutral-400">{formatDistance(place.distance)}</span>
+              )}
+              {(place.priceLevel && PRICE_MAP[place.priceLevel] || place.priceRange) && (
+                <span className="text-xs font-semibold text-green-600 dark:text-green-400">
+                  {PRICE_MAP[place.priceLevel]}{place.priceRange && (
+                    <span className="font-normal text-stone-400 dark:text-neutral-500"> {place.priceRange}</span>
+                  )}
+                </span>
+              )}
+              {place.openNow != null && (
+                <span className={`text-xs font-medium ${place.openNow ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
+                  {place.openNow ? 'Open' : 'Closed'}
+                </span>
+              )}
             </div>
           </div>
 
@@ -76,8 +110,17 @@ export default function RestaurantCard({ place, userLocation, isWinner, isOnWhee
           </div>
         )}
 
+        {place.rating && (
+          <div className="flex items-center gap-1.5 mt-2">
+            <RatingStars rating={place.rating} />
+            {place.ratingCount && (
+              <span className="text-xs text-stone-400 dark:text-neutral-500">({place.ratingCount})</span>
+            )}
+          </div>
+        )}
+
         {place.address && (
-          <p className="text-sm text-stone-500 dark:text-neutral-400 mt-2 leading-relaxed">{place.address}</p>
+          <p className="text-xs text-stone-400 dark:text-neutral-500 mt-2 leading-relaxed">{place.address}</p>
         )}
 
         <div className="flex gap-2 mt-auto pt-3">

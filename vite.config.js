@@ -16,23 +16,32 @@ export default defineConfig(({ mode }) => {
       react(),
       tailwindcss(),
       {
-        name: 'foursquare-proxy',
+        name: 'google-places-proxy',
         configureServer(server) {
-          server.middlewares.use('/api/foursquare', async (req, res) => {
-            const query = req.url.startsWith('?') ? req.url.slice(1) : req.url.replace(/^[^?]*\?/, '');
-            const fsqUrl = `https://places-api.foursquare.com/places/search?${query}`;
+          server.middlewares.use('/api/google-places', async (req, res) => {
+            const chunks = [];
+            req.on('data', (chunk) => chunks.push(chunk));
+            req.on('end', async () => {
+              const body = Buffer.concat(chunks).toString();
+              const fieldMask = req.headers['x-goog-fieldmask'] || '';
 
-            const response = await fetch(fsqUrl, {
-              headers: {
-                Authorization: `Bearer ${env.VITE_FOURSQUARE_API_KEY}`,
-                Accept: 'application/json',
-                'X-Places-Api-Version': '2025-06-17',
-              },
+              const response = await fetch(
+                'https://places.googleapis.com/v1/places:searchNearby',
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-Goog-Api-Key': env.GOOGLE_PLACES_API_KEY,
+                    'X-Goog-FieldMask': fieldMask,
+                  },
+                  body,
+                }
+              );
+
+              const data = await response.json();
+              res.writeHead(response.status, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify(data));
             });
-
-            const data = await response.json();
-            res.writeHead(response.status, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(data));
           });
         },
       },
