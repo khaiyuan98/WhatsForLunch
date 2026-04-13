@@ -19,6 +19,19 @@ VITE_FOURSQUARE_API_KEY=<your-key>
 
 The API key is kept server-side in both dev and production — the client never sends auth headers. In dev, a Vite plugin middleware proxies requests; in production, a Vercel serverless function does the same.
 
+## Features
+
+- Spin wheel picks a random restaurant from nearby places
+- Adjustable search radius, break time, travel mode, and number of contenders
+- Add/remove individual places, or select all/clear all
+- Sort results by distance or alphabetically
+- Filter results by name or category
+- Google Maps directions with exact coordinates
+- Settings remembered between visits (localStorage)
+- Dark/light mode with system preference detection
+- Responsive design (mobile-first)
+- Playful flavor text throughout
+
 ## Tech Stack
 
 - React 18

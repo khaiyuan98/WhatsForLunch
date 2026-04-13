@@ -22,7 +22,7 @@ export default function SettingsPanel({ breakTime, setBreakTime, travelMode, set
 
   function ToggleGroup({ options, value, onChange }) {
     return (
-      <div className="flex gap-1.5 bg-stone-100 dark:bg-neutral-800 p-1 rounded-xl">
+      <div className="flex gap-1.5 bg-amber-100/60 dark:bg-neutral-800 p-1 rounded-xl">
         {options.map((opt) => (
           <button
             key={opt.value}
@@ -42,17 +42,17 @@ export default function SettingsPanel({ breakTime, setBreakTime, travelMode, set
 
   return (
     <div className="w-full max-w-md mx-auto animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-      <div className="bg-stone-50 dark:bg-neutral-900 rounded-2xl p-6 border border-stone-300 dark:border-neutral-800 shadow-sm space-y-5">
+      <div className="bg-[#faf6f1] dark:bg-neutral-900 rounded-2xl p-4 sm:p-6 border border-amber-200 dark:border-neutral-800 shadow-sm space-y-4 sm:space-y-5">
         <div>
           <label className="block text-sm font-semibold text-stone-700 dark:text-neutral-400 mb-2">
-            How long is your break?
+            How long do you have?
           </label>
           <ToggleGroup options={breakOptions} value={breakTime} onChange={setBreakTime} />
         </div>
 
         <div>
           <label className="block text-sm font-semibold text-stone-700 dark:text-neutral-400 mb-2">
-            How are you getting there?
+            Legs or wheels?
           </label>
           <ToggleGroup
             options={[
@@ -66,7 +66,7 @@ export default function SettingsPanel({ breakTime, setBreakTime, travelMode, set
 
         <div>
           <label className="block text-sm font-semibold text-stone-700 dark:text-neutral-400 mb-2">
-            Search radius
+            How far will you go?
             <span className="ml-2 text-orange-500 font-bold">{formatRadius(searchRadius)}</span>
           </label>
           <input
@@ -86,7 +86,7 @@ export default function SettingsPanel({ breakTime, setBreakTime, travelMode, set
 
         <div>
           <label className="block text-sm font-semibold text-stone-700 dark:text-neutral-400 mb-2">
-            Places on the wheel
+            How many contenders?
           </label>
           <ToggleGroup options={wheelOptions} value={wheelSize} onChange={setWheelSize} />
         </div>
@@ -96,7 +96,7 @@ export default function SettingsPanel({ breakTime, setBreakTime, travelMode, set
           disabled={disabled}
           className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-neutral-300 dark:disabled:bg-neutral-700 disabled:text-neutral-500 text-white font-bold py-4 px-6 rounded-xl text-lg transition-all cursor-pointer"
         >
-          Find My Lunch!
+          Feed Me!
         </button>
       </div>
     </div>

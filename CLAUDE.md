@@ -42,20 +42,21 @@ npm run preview  # Serve the production build locally
 api/
   foursquare.js            # Vercel serverless function — proxies Foursquare API with server-side auth
 src/
-  App.jsx                  # Main app — manages step flow (setup → loading → results)
+  App.jsx                  # Main app — manages step flow (setup → loading → results), localStorage persistence
   main.jsx                 # React root mount
-  index.css                # Tailwind import + body gradient
+  index.css                # Tailwind import + body gradient + animations
   components/
-    Header.jsx             # Title and tagline
-    LocationPicker.jsx     # GPS detection + address autocomplete (debounced)
-    SettingsPanel.jsx      # Break time (30/45/60 min) + travel mode (walking/driving)
-    SpinWheel.jsx          # Canvas-based spin wheel with eased animation
-    ResultsGrid.jsx        # Sorts places (winner first), renders cards in 2-col grid
-    RestaurantCard.jsx     # Place card with category icon, distance, directions link
-    LoadingSpinner.jsx     # Simple CSS spinner
+    Header.jsx             # Title and rotating random taglines
+    ThemeToggle.jsx        # Dark/light mode toggle (fixed position, persisted in localStorage)
+    LocationPicker.jsx     # GPS detection + address autocomplete (debounced, z-indexed dropdown)
+    SettingsPanel.jsx      # Break time, travel mode, search radius slider, wheel size
+    SpinWheel.jsx          # Canvas-based spin wheel with gradient segments, eased animation, empty state handling
+    ResultsGrid.jsx        # Sticky toolbar with filter, sort (distance/A-Z), select all/clear all, responsive grid
+    RestaurantCard.jsx     # Place card with category icon, distance, directions link, add/remove toggle
+    LoadingSpinner.jsx     # Animated spinner with rotating flavor text messages
   services/
     location.js            # Wraps navigator.geolocation
-    geocoding.js           # Nominatim forward/reverse geocoding (returns locality for fallback)
+    geocoding.js           # Nominatim forward/reverse geocoding
     overpass.js            # Foursquare Places API search + result normalization + pickRandom
   utils/
     distance.js            # Haversine distance, formatting, search radius lookup
@@ -64,11 +65,16 @@ vercel.json                # Vercel route rewrites
 
 ## Key Design Decisions
 
-- Search radius is computed from break time and travel mode via a lookup table in `utils/distance.js`, not user-configurable directly
-- The wheel picks from 10 randomly selected places out of all results (up to 50 fetched)
-- No persistent state — refreshing starts over
+- Search radius has smart defaults computed from break time and travel mode (`utils/distance.js`), but the user can override it via a slider
+- Default settings: 60 min break, walking mode, 10 places on wheel
+- All user settings (break time, travel mode, wheel size, search radius) persist in localStorage
+- The wheel picks from randomly selected places out of all results (up to 50 fetched); users can add/remove/select all/clear all
+- Wheel requires at least 2 places to spin; shows helpful messages for 0 or 1 items
 - Foursquare API calls go to `/api/foursquare` in both environments. In dev, a Vite plugin middleware (`vite.config.js`) proxies with the API key server-side using `loadEnv()`. In production on Vercel, a serverless function (`api/foursquare.js`) does the same. The client never sends auth headers — the API key stays server-side in both environments.
 - Category icons from Foursquare are used as restaurant images (actual photos are a premium feature)
 - Directions links use exact lat/lng coordinates for both origin and destination, ensuring precise navigation
 - Location object carries `{ lat, lng, locality }` — locality (city, state) comes from Nominatim
+- Warm color palette: cream/amber tones in light mode, neutral dark in dark mode
+- Responsive design: single-column cards on mobile, 2-column on `sm:` breakpoint; compact sticky toolbar
+- App version is injected from `package.json` at build time via Vite `define` and shown in footer
 - No tests or linting configured

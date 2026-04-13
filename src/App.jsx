@@ -9,6 +9,8 @@ import LoadingSpinner from './components/LoadingSpinner';
 import { searchNearbyFood, pickRandom } from './services/overpass';
 import { getSearchRadius } from './utils/distance';
 
+const APP_VERSION = __APP_VERSION__;
+
 export default function App() {
   const [dark, setDark] = useState(() => {
     const saved = localStorage.getItem('theme');
@@ -88,7 +90,7 @@ export default function App() {
       const fetched = await searchNearbyFood(location.lat, location.lng, effectiveRadius);
 
       if (fetched.length === 0) {
-        setError('No food places found nearby. Try increasing your break time or switching to driving.');
+        setError('No food nearby — are you in the middle of nowhere? Try a bigger radius or switch to driving.');
         setStep('setup');
         return;
       }
@@ -98,7 +100,7 @@ export default function App() {
       setSelectedIds(new Set(preSelected.map((p) => p.id)));
       setStep('results');
     } catch (err) {
-      setError(err.message || 'Something went wrong. Please try again.');
+      setError(err.message || 'Oops, something broke. Give it another shot!');
       setStep('setup');
     } finally {
       setLoading(false);
@@ -124,6 +126,14 @@ export default function App() {
     setWinnerId(winner.id);
   }
 
+  function handleSelectAll() {
+    setSelectedIds(new Set(allPlaces.map((p) => p.id)));
+  }
+
+  function handleClearAll() {
+    setSelectedIds(new Set());
+  }
+
   function handleStartOver() {
     setAllPlaces([]);
     setSelectedIds(new Set());
@@ -133,7 +143,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen px-4 pb-12 bg-stone-200 dark:bg-[#0f0f0f] text-stone-800 dark:text-neutral-100 transition-colors">
+    <div className="min-h-screen px-4 pb-12 bg-[#f5ebe0] dark:bg-[#0f0f0f] text-stone-800 dark:text-neutral-100 transition-colors">
       <ThemeToggle dark={dark} onToggle={() => setDark(!dark)} />
       <Header />
 
@@ -173,11 +183,17 @@ export default function App() {
               winnerId={winnerId}
               selectedIds={selectedIds}
               onToggle={handleTogglePlace}
+              onSelectAll={handleSelectAll}
+              onClearAll={handleClearAll}
               onStartOver={handleStartOver}
             />
           </>
         )}
       </main>
+
+      <footer className="text-center py-6 mt-8">
+        <p className="text-xs text-stone-400 dark:text-neutral-600">v{APP_VERSION}</p>
+      </footer>
     </div>
   );
 }

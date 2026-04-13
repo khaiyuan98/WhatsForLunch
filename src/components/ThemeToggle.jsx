@@ -2,7 +2,7 @@ export default function ThemeToggle({ dark, onToggle }) {
   return (
     <button
       onClick={onToggle}
-      className="fixed top-4 right-4 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 shadow-sm transition-colors cursor-pointer"
+      className="fixed top-3 right-3 sm:top-4 sm:right-4 z-30 w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 shadow-sm transition-colors cursor-pointer"
       title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       {dark ? (
