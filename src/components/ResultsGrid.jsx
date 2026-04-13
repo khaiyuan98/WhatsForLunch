@@ -96,7 +96,7 @@ export default function ResultsGrid({ places, userLocation, winnerId, selectedId
 
         {categories.length > 1 && (
           <div className="relative mt-2">
-          <div className="flex flex-wrap gap-1.5 pb-1">
+          <div className="flex gap-1.5 pb-1 overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible">
             <button
               onClick={() => setExcludedCategories(new Set())}
               className={`shrink-0 text-xs font-semibold px-3 py-1 rounded-full border-2 transition-all cursor-pointer ${
