@@ -17,7 +17,13 @@ const PRICE_ORDER = [
   'PRICE_LEVEL_VERY_EXPENSIVE',
 ];
 
-export default function ResultsGrid({ places, userLocation, winnerId, selectedIds, onToggle, onSelectAll, onClearAll, onStartOver }) {
+const PICKER_LABEL = {
+  wheel: 'on the wheel',
+  slots: 'in the slots',
+  dice: 'on the dice',
+};
+
+export default function ResultsGrid({ places, userLocation, winnerId, selectedIds, onToggle, onSelectAll, onClearAll, onStartOver, pickerMode }) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('distance');
   const [excludedCategories, setExcludedCategories] = useState(() => {
@@ -259,23 +265,22 @@ export default function ResultsGrid({ places, userLocation, winnerId, selectedId
           <div className="flex items-center gap-2">
             <p className="text-xs text-stone-500 dark:text-neutral-500">
               <span className="text-orange-500 font-semibold">{selectedIds.size}</span>
-              <span className="hidden sm:inline"> contenders</span> on wheel
+              <span className="hidden sm:inline"> contenders</span> {PICKER_LABEL[pickerMode] ?? 'in the mix'}
               {hasActiveFilters && <> — {sorted.length}/{places.length}</>}
             </p>
             <button
               onClick={() => onSelectAll(sorted.map((p) => p.id))}
               disabled={sorted.every((p) => selectedIds.has(p.id))}
-              className="text-xs font-medium text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 disabled:opacity-30 disabled:cursor-default cursor-pointer transition-colors"
+              className="text-xs font-semibold px-2 py-0.5 rounded-md bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-500/25 disabled:opacity-30 disabled:cursor-default cursor-pointer transition-colors"
             >
               All
             </button>
-            <span className="text-stone-300 dark:text-neutral-700">|</span>
             <button
               onClick={() => onClearAll(sorted.map((p) => p.id))}
               disabled={sorted.every((p) => !selectedIds.has(p.id))}
-              className="text-xs font-medium text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 disabled:opacity-30 disabled:cursor-default cursor-pointer transition-colors"
+              className="text-xs font-semibold px-2 py-0.5 rounded-md bg-red-100 dark:bg-red-500/15 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-500/25 disabled:opacity-30 disabled:cursor-default cursor-pointer transition-colors"
             >
-              None
+              Clear
             </button>
           </div>
           <div className="flex gap-1 bg-amber-100/60 dark:bg-neutral-800 p-0.5 rounded-lg">

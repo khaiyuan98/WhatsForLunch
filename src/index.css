@@ -36,6 +36,23 @@ body {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
+@keyframes dice-tumble {
+  0%   { transform: rotate(0deg) scale(1); }
+  10%  { transform: rotate(72deg) scale(0.92); }
+  25%  { transform: rotate(144deg) scale(0.95); }
+  40%  { transform: rotate(252deg) scale(0.9); }
+  55%  { transform: rotate(360deg) scale(0.94); }
+  70%  { transform: rotate(432deg) scale(0.92); }
+  82%  { transform: rotate(486deg) scale(0.96); }
+  91%  { transform: rotate(510deg) scale(0.98); }
+  96%  { transform: rotate(520deg) scale(0.99); }
+  100% { transform: rotate(520deg) scale(1); }
+}
+
+.animate-dice-tumble {
+  animation: dice-tumble 2.4s cubic-bezier(0.15, 0.85, 0.25, 1) both;
+}
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
