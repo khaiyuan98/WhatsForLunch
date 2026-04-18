@@ -230,7 +230,15 @@ export default function App() {
 
         {step === 'results' && (
           <>
-            <SpinWheel items={wheelPlaces} onResult={handleWheelResult} dark={dark} />
+            <SpinWheel
+              items={wheelPlaces}
+              onResult={handleWheelResult}
+              onRemoveWinner={(id) => {
+                setSelectedIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
+                setWinnerId(null);
+              }}
+              dark={dark}
+            />
 
             <ResultsGrid
               places={allPlaces}

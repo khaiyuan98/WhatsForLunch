@@ -5,7 +5,7 @@ const COLORS = [
   '#D97706', '#DB2777', '#4F46E5', '#0D9488', '#E11D48',
 ];
 
-export default function SpinWheel({ items, onResult, dark }) {
+export default function SpinWheel({ items, onResult, onRemoveWinner, dark }) {
   const canvasRef = useRef(null);
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
@@ -245,6 +245,18 @@ export default function SpinWheel({ items, onResult, dark }) {
             {winner.name}
           </p>
           <p className="text-stone-500 dark:text-neutral-400 mt-1 font-medium">The wheel has spoken. Go eat!</p>
+          <button
+            onClick={() => {
+              onRemoveWinner(winner.id);
+              setWinner(null);
+            }}
+            className="mt-3 inline-flex items-center gap-1.5 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 border border-red-200 dark:border-red-500/30 text-sm font-semibold py-2 px-4 rounded-full shadow-sm transition-all cursor-pointer"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+              <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+            </svg>
+            Not this one — spin again
+          </button>
         </div>
       )}
     </div>
